@@ -1,28 +1,32 @@
+import pickle5 as pickle
 from flask import Flask, render_template, request
-import pickle
 
 app = Flask(__name__)
 
-model = pickle.load(open("/workspaces/house_loan_prediction_model/housepredt.pkl","rb"))
+df = pickle.load(open("models/housepredt.pkl","rb"))
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return render_template('index.html', res='')
+    price=''
+    if request.args.get('Population') and request.args.get('Income') and request.args.get('Age') and request.args.get('Rooms'):
+        query = request.args.get('Population')
+        Population = eval(query)
 
-@app.route('/', methods=['POST'])
-def predict():
-    price = ''
-    if request.form.get('Population') and request.form.get('Income') and request.form.get('Age') and request.form.get('Rooms'):
-        Population = float(request.form['Population'])
-        Income = float(request.form['Income'])
-        Age = float(request.form['Age'])
-        Rooms = float(request.form['Rooms'])
+        query = request.args.get('Income')
+        Income = eval(query)
 
-        Predt = [[Population, Income, Age, Rooms]]
+        query = request.args.get('Age')
+        Age = eval(query)
 
-        price = str(model.predict(Predt)[0])
+        query = request.args.get('Rooms')
+        Rooms = eval(query)
 
-    return render_template('index.html', res=price)
+        Predt = [[Population,Income,Age,Rooms]]
+
+        price = df.predict(Predt)
+        price = str(price[0])
+
+    return render_template('index.html',res=price)
 
 @app.route('/about')
 def about():
